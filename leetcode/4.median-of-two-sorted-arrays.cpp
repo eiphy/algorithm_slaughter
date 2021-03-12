@@ -98,13 +98,67 @@ class Solution {
 
         return -1;
     }
+    double findMedianSortedArraysSolution(
+        vector<int>& nums1,
+        vector<int>& nums2) {
+        int m{static_cast<int>(nums1.size())};
+        int n{static_cast<int>(nums2.size())};
+        bool odd{static_cast<bool>((n + m) % 2)};
+        int med_pos{(m + n) / 2};
+
+        // Special Case.
+        if (m == 0 && n == 0)
+            return 0.0;
+        else if (m == 0)
+            return odd ? nums2[med_pos]
+                       : (nums2[med_pos] + nums2[med_pos - 1]) / 2.0;
+        else if (n == 0)
+            return odd ? nums1[med_pos]
+                       : (nums1[med_pos] + nums1[med_pos - 1]) / 2.0;
+
+        // General case.
+        vector<int>& longer_nums = m >= n ? nums1 : nums2;
+        vector<int>& shorter_nums = m >= n ? nums2 : nums1;
+        int longer_size{max(m, n)}, shorter_size{min(m, n)};
+        med_pos = (m + n + 1) / 2;
+        int start{0}, end{shorter_size}, i{-1}, j{-1};
+        while (start <= end) {
+            i = (start + end) / 2;
+            j = med_pos - i;
+            if (i < shorter_size && shorter_nums[i] < longer_nums[j - 1])
+                start = i + 1;
+            else if (i > 0 && shorter_nums[i - 1] > longer_nums[j])
+                end = i - 1;
+            else
+                break;
+        }
+
+        double left_max{0.0}, right_min{0.0};
+        if (i == 0)
+            left_max = longer_nums[j - 1];
+        else if (j == 0)
+            left_max = shorter_nums[i - 1];
+        else
+            left_max = max(longer_nums[j - 1], shorter_nums[i - 1]);
+
+        if (odd)
+            return left_max;
+
+        if (i == shorter_size)
+            right_min = longer_nums[j];
+        else if (j == longer_size)
+            right_min = shorter_nums[i];
+        else
+            right_min = min(longer_nums[j], shorter_nums[i]);
+        return (left_max + right_min) / 2.0;
+    }
 };
 
 int main() {
-    vector<int> num1{1, 3, 4, 5};
+    vector<int> num1{1, 3};
     vector<int> num2{2};
     Solution a;
-    double b(a.findMedianSortedArrays(num1, num2));
+    double b(a.findMedianSortedArraysSolution(num1, num2));
     cout << b << endl;
     return 0;
 }
